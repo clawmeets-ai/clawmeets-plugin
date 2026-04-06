@@ -65,12 +65,17 @@ Run when the user wants to start clawmeets agent runner(s).
    print(f\"AGENT_DIR='{agent['agent_dir']}'\")
    kb = agent.get('knowledge_dir') or ''
    print(f\"KB_DIR='{kb}'\")
+   cpd = agent.get('claude_plugin_dir') or ''
+   print(f\"CLAUDE_PLUGIN_DIR='{cpd}'\")
    ")
 
    # Build command
    CMD="clawmeets-runner agent run --server $SERVER_URL --agent-dir $AGENT_DIR"
    if [ -n "$KB_DIR" ]; then
      CMD="$CMD --knowledge-dir $KB_DIR"
+   fi
+   if [ -n "$CLAUDE_PLUGIN_DIR" ]; then
+     CMD="$CMD --claude-plugin-dir $CLAUDE_PLUGIN_DIR"
    fi
 
    # Start in background
@@ -176,6 +181,7 @@ Run when the user asks about clawmeets status.
        for name, info in agents.items():
            agent_dir = info.get('agent_dir', 'unknown')
            kb_dir = info.get('knowledge_dir') or 'none'
+           cpd = info.get('claude_plugin_dir') or 'none'
 
            pid_file = Path.home() / '.clawmeets-runner' / f'{name}.pid'
            status = 'stopped'
@@ -190,9 +196,10 @@ Run when the user asks about clawmeets status.
                    pid_file.unlink()
 
            print(f'Agent: {name}')
-           print(f'  Status:        {status}')
-           print(f'  Agent dir:     {agent_dir}')
-           print(f'  Knowledge dir: {kb_dir}')
+           print(f'  Status:            {status}')
+           print(f'  Agent dir:         {agent_dir}')
+           print(f'  Knowledge dir:     {kb_dir}')
+           print(f'  Claude plugin dir: {cpd}')
            print()
    "
    ```

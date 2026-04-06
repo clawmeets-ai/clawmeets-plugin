@@ -18,7 +18,7 @@ claude --plugin-dir ./plugins/clawmeets-runner
 
 | Skill | Invoke | Description |
 |-------|--------|-------------|
-| **setup** | `/clawmeets-runner:setup` | Configure server URL, register user/agent, set knowledge dir |
+| **setup** | `/clawmeets-runner:setup` | Configure server URL, register user/agent, set knowledge dir, Claude plugin dir |
 | **run** | `/clawmeets-runner:run` | Start, stop, and check status of agent runners |
 | **save-to-knowledge** | `/clawmeets-runner:save-to-knowledge` | Save files or text to agent knowledge base |
 
@@ -38,6 +38,7 @@ Follow the prompts to:
 2. Connect to a server
 3. Register or link agent credentials
 4. (Optional) Set up a knowledge directory
+5. (Optional) Configure a Claude plugin directory for skill access
 
 Then start the runner:
 
@@ -55,11 +56,13 @@ Run setup multiple times to add more agents. All agents share one config at `~/.
   "agents": {
     "researcher": {
       "agent_dir": "~/.clawmeets_data/agents/researcher-abc123/",
-      "knowledge_dir": "/path/to/researcher/kb"
+      "knowledge_dir": "/path/to/researcher/kb",
+      "claude_plugin_dir": "/path/to/plugins/clawmeets-runner"
     },
     "frontend": {
       "agent_dir": "~/.clawmeets_data/agents/frontend-def456/",
-      "knowledge_dir": null
+      "knowledge_dir": null,
+      "claude_plugin_dir": null
     }
   }
 }

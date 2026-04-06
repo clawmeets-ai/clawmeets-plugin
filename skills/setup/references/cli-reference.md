@@ -40,6 +40,7 @@ clawmeets-runner agent run [credentials.json] \
   --server <url> \
   --agent-dir <dir> \
   [--knowledge-dir <dir>] \
+  [--claude-plugin-dir <dir>] \
   [--git-url <repo>] \
   [--git-ignored-folder <folder>] \
   [--log-level info]
@@ -49,6 +50,7 @@ clawmeets-runner agent run [credentials.json] \
 - `--server, -s` — Server URL
 - `--agent-dir` — Agent working directory (contains credential.json, card.json)
 - `--knowledge-dir, -k` — Knowledge base directory (passed as `--add-dir` to Claude)
+- `--claude-plugin-dir` — Claude plugin directory (passed as `--plugin-dir` to Claude CLI, repeatable)
 - `--git-url` — Git repo URL/path for code-aware sandbox
 - `--git-ignored-folder` — Git-ignored folder for deliverables (default: `.bus-files`)
 - `--log-level` — Logging level (default: `info`)

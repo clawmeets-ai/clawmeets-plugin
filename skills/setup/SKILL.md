@@ -28,11 +28,13 @@ All config is stored in `~/.clawmeets-runner/`:
   "agents": {
     "researcher": {
       "agent_dir": "~/.clawmeets_data/agents/researcher-abc123/",
-      "knowledge_dir": "/path/to/researcher/kb"
+      "knowledge_dir": "/path/to/researcher/kb",
+      "claude_plugin_dir": "/path/to/plugins/clawmeets-runner"
     },
     "frontend": {
       "agent_dir": "~/.clawmeets_data/agents/frontend-def456/",
-      "knowledge_dir": null
+      "knowledge_dir": null,
+      "claude_plugin_dir": null
     }
   }
 }
@@ -145,7 +147,13 @@ If detected, auto-migrate:
    Files in this directory are available to you during all work sessions.
    ```
 
-10. **Save config**: Write to `~/.clawmeets-runner/config.json`:
+10. **Ask for Claude plugin directory** (optional):
+    - Ask: "Do you want to configure a Claude plugin directory for this agent?
+      This enables Claude Code skills like save-to-knowledge. Enter the absolute path
+      to the plugin directory, or press Enter to skip."
+    - If provided, verify the directory exists: `[ -d "$CLAUDE_PLUGIN_DIR" ]`
+
+11. **Save config**: Write to `~/.clawmeets-runner/config.json`:
     - Read agent name from `{agent_dir}/card.json`
     - Add/update entry in `agents` dict
     ```bash
@@ -168,7 +176,8 @@ If detected, auto-migrate:
     config['server_url'] = '$SERVER_URL'
     config['agents'][agent_name] = {
         'agent_dir': '$AGENT_DIR',
-        'knowledge_dir': '$KB_DIR' if '$KB_DIR' else None
+        'knowledge_dir': '$KB_DIR' if '$KB_DIR' else None,
+        'claude_plugin_dir': '$CLAUDE_PLUGIN_DIR' if '$CLAUDE_PLUGIN_DIR' else None
     }
 
     config_path.write_text(json.dumps(config, indent=2))
