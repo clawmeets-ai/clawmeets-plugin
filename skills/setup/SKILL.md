@@ -82,7 +82,14 @@ If detected, auto-migrate:
 
 5. **If registering a new user account**:
    - Ask for username, password, and email address
+   - Usernames must be alphanumeric with underscores only (no hyphens), minimum 5 characters
    - Run: `clawmeets-runner user register "<username>" "<password>" "<email>" --server <url>`
+   - **If registration fails** (exit code 1): read the error message, explain it to the user, and ask for a corrected value. Common errors:
+     - "Username must be at least 5 characters" → ask for a longer username (short names are reserved for admin use)
+     - "Username cannot contain hyphens" → suggest replacing `-` with `_`
+     - "already registered" → ask for a different username or email
+     - Other validation errors → explain the constraint and ask for a new value
+   - Retry registration with the corrected input. Repeat until successful or the user cancels.
    - Tell the user: "A verification email will be sent to your email address. You must verify your email before you can log in. Please check your inbox (and spam folder)."
    - Note the assistant agent directory path from the output
    - After the user verifies their email, they can proceed

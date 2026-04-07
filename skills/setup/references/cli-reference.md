@@ -75,7 +75,7 @@ clawmeets-runner user register <username> <password> <email> \
   [--agent-dir <dir>]
 ```
 
-**Behavior:** Creates user + assistant agent. Login is blocked until email is verified.
+**Behavior:** Creates user + assistant agent. Login is blocked until email is verified. Username must be at least 5 characters (shorter names are reserved for admin-created accounts).
 
 ### user login
 
