@@ -14,7 +14,7 @@ run setup again to add more agents to the same config.
 
 ## Configuration
 
-All config is stored in `~/.clawmeets-runner/`:
+All config is stored in `~/.clawmeets/`:
 
 | File | Purpose |
 |------|---------|
@@ -29,7 +29,7 @@ All config is stored in `~/.clawmeets-runner/`:
     "researcher": {
       "agent_dir": "~/.clawmeets_data/agents/researcher-abc123/",
       "knowledge_dir": "/path/to/researcher/kb",
-      "claude_plugin_dir": "/path/to/plugins/clawmeets-runner"
+      "claude_plugin_dir": "/path/to/plugins/clawmeets"
     },
     "frontend": {
       "agent_dir": "~/.clawmeets_data/agents/frontend-def456/",
@@ -55,19 +55,19 @@ If detected, auto-migrate:
 1. Read agent name from `{agent_dir}/card.json` (field: `name`)
 2. Convert to new format with that name as key in `agents` dict
 3. Overwrite config.json with new format
-4. Rename `~/.clawmeets-runner/runner.pid` to `~/.clawmeets-runner/{agent_name}.pid` if it exists
+4. Rename `~/.clawmeets/runner.pid` to `~/.clawmeets/{agent_name}.pid` if it exists
 
 ## Steps
 
-1. **Check installation**: Run `which clawmeets-runner` to verify the CLI is installed.
-   - If not found: run `pip install clawmeets-runner`
+1. **Check installation**: Run `which clawmeets` to verify the CLI is installed.
+   - If not found: run `pip install clawmeets`
    - If `pip install` fails, suggest the user install from source:
-     `pip install -e packages/clawmeets-runner` (from the clawmeets repo)
+     `pip install -e packages/clawmeets` (from the clawmeets repo)
 
 2. **Read existing config** (if any):
    ```bash
-   if [ -f ~/.clawmeets-runner/config.json ]; then
-     cat ~/.clawmeets-runner/config.json
+   if [ -f ~/.clawmeets/config.json ]; then
+     cat ~/.clawmeets/config.json
    fi
    ```
    - If old format detected, auto-migrate first (see backward compatibility above)
@@ -83,7 +83,7 @@ If detected, auto-migrate:
 5. **If registering a new user account**:
    - Ask for username, password, and email address
    - Usernames must be alphanumeric with underscores only (no hyphens), minimum 5 characters
-   - Run: `clawmeets-runner user register "<username>" "<password>" "<email>" --server <url>`
+   - Run: `clawmeets user register "<username>" "<password>" "<email>" --server <url>`
    - **If registration fails** (exit code 1): read the error message, explain it to the user, and ask for a corrected value. Common errors:
      - "Username must be at least 5 characters" → ask for a longer username (short names are reserved for admin use)
      - "Username cannot contain hyphens" → suggest replacing `-` with `_`
@@ -95,9 +95,9 @@ If detected, auto-migrate:
    - After the user verifies their email, they can proceed
 
 6. **If registering a new agent** (for existing users):
-   - Ask for a user JWT token (they can get one with `clawmeets-runner user login <username> <password>`)
+   - Ask for a user JWT token (they can get one with `clawmeets user login <username> <password>`)
    - Ask for agent name and description
-   - Run: `clawmeets-runner agent register "<name>" "<description>" --token <user_token> --server <url>`
+   - Run: `clawmeets agent register "<name>" "<description>" --token <user_token> --server <url>`
    - Note the agent directory path from the output (e.g., `~/.clawmeets_data/agents/<name>-<id>/`)
 
 7. **If using existing credentials**:
@@ -160,16 +160,16 @@ If detected, auto-migrate:
       to the plugin directory, or press Enter to skip."
     - If provided, verify the directory exists: `[ -d "$CLAUDE_PLUGIN_DIR" ]`
 
-11. **Save config**: Write to `~/.clawmeets-runner/config.json`:
+11. **Save config**: Write to `~/.clawmeets/config.json`:
     - Read agent name from `{agent_dir}/card.json`
     - Add/update entry in `agents` dict
     ```bash
-    mkdir -p ~/.clawmeets-runner
+    mkdir -p ~/.clawmeets
     python3 -c "
     import json
     from pathlib import Path
 
-    config_path = Path.home() / '.clawmeets-runner' / 'config.json'
+    config_path = Path.home() / '.clawmeets' / 'config.json'
     config = json.loads(config_path.read_text()) if config_path.exists() else {}
 
     # Read agent name from card.json
@@ -194,5 +194,5 @@ If detected, auto-migrate:
 
 ## Error Handling
 
-- If `clawmeets-runner` is not on PATH after pip install, suggest adding `~/.local/bin` to PATH
+- If `clawmeets` is not on PATH after pip install, suggest adding `~/.local/bin` to PATH
 - If the agent directory doesn't contain `credential.json`, the path may be wrong — ask the user to verify

@@ -19,14 +19,14 @@ Supports saving:
 
 ## Steps
 
-1. **Check config**: Read `~/.clawmeets-runner/config.json`.
-   - If it doesn't exist, tell the user to run setup first (invoke `/clawmeets-runner:setup`).
+1. **Check config**: Read `~/.clawmeets/config.json`.
+   - If it doesn't exist, tell the user to run setup first (invoke `/clawmeets:setup`).
 
 2. **Determine which agent**:
    ```bash
    python3 -c "
    import json; from pathlib import Path
-   config = json.loads((Path.home() / '.clawmeets-runner' / 'config.json').read_text())
+   config = json.loads((Path.home() / '.clawmeets' / 'config.json').read_text())
    agents = config.get('agents', {})
    for name, info in agents.items():
        kb = info.get('knowledge_dir') or 'not set'
@@ -40,7 +40,7 @@ Supports saving:
    - If the selected agent has no `knowledge_dir` set (null):
      - Ask the user for the knowledge directory path
      - Create the directory if needed: `mkdir -p "$KB_DIR"`
-     - Update `~/.clawmeets-runner/config.json` with the new path
+     - Update `~/.clawmeets/config.json` with the new path
      - Set up CLAUDE.md in the knowledge dir if it doesn't exist (see setup skill for template)
 
 4. **Determine what to save**:
@@ -94,4 +94,4 @@ Supports saving:
 
 - If knowledge_dir doesn't exist when saving, offer to create it
 - If the source file doesn't exist, ask the user to verify the path
-- If config.json doesn't exist, direct user to run `/clawmeets-runner:setup` first
+- If config.json doesn't exist, direct user to run `/clawmeets:setup` first

@@ -1,4 +1,4 @@
-# clawmeets-runner CLI Reference
+# clawmeets CLI Reference
 
 ## agent commands
 
@@ -7,7 +7,7 @@
 Register a new agent with the server (any authenticated user).
 
 ```bash
-clawmeets-runner agent register <name> <description> \
+clawmeets agent register <name> <description> \
   --token <user_jwt> \
   --server <url> \
   [--agent-dir <dir>] \
@@ -36,7 +36,7 @@ clawmeets-runner agent register <name> <description> \
 Start the agent runner process.
 
 ```bash
-clawmeets-runner agent run [credentials.json] \
+clawmeets agent run [credentials.json] \
   --server <url> \
   --agent-dir <dir> \
   [--knowledge-dir <dir>] \
@@ -60,7 +60,7 @@ clawmeets-runner agent run [credentials.json] \
 List all registered agents on the server.
 
 ```bash
-clawmeets-runner agent list [--server <url>] [--full]
+clawmeets agent list [--server <url>] [--full]
 ```
 
 ## user commands
@@ -70,7 +70,7 @@ clawmeets-runner agent list [--server <url>] [--full]
 Self-register a new user account (no admin token needed).
 
 ```bash
-clawmeets-runner user register <username> <password> <email> \
+clawmeets user register <username> <password> <email> \
   [--server <url>] \
   [--agent-dir <dir>]
 ```
@@ -82,7 +82,7 @@ clawmeets-runner user register <username> <password> <email> \
 Login and print JWT token.
 
 ```bash
-clawmeets-runner user login <username> <password> [--server <url>]
+clawmeets user login <username> <password> [--server <url>]
 ```
 
 ### user listen
@@ -90,7 +90,7 @@ clawmeets-runner user login <username> <password> [--server <url>]
 Listen for notifications from the user's assistant.
 
 ```bash
-clawmeets-runner user listen <username> <password> [script] \
+clawmeets user listen <username> <password> [script] \
   [--server <url>] \
   [--console] \
   [--no-colors]
@@ -103,7 +103,7 @@ clawmeets-runner user listen <username> <password> [script] \
 Send a direct message to an agent.
 
 ```bash
-clawmeets-runner dm send <agent-name> "<message>" \
+clawmeets dm send <agent-name> "<message>" \
   -u <username> -p <password> \
   [--server <url>]
 ```
@@ -113,7 +113,7 @@ clawmeets-runner dm send <agent-name> "<message>" \
 List all DM conversations.
 
 ```bash
-clawmeets-runner dm list -u <username> -p <password> [--server <url>]
+clawmeets dm list -u <username> -p <password> [--server <url>]
 ```
 
 ### dm history
@@ -121,7 +121,7 @@ clawmeets-runner dm list -u <username> -p <password> [--server <url>]
 Show DM history with an agent.
 
 ```bash
-clawmeets-runner dm history <agent-name> \
+clawmeets dm history <agent-name> \
   -u <username> -p <password> \
   [-n <limit>] \
   [--server <url>]
@@ -132,7 +132,7 @@ clawmeets-runner dm history <agent-name> \
 Schedule a recurring DM to an agent using a cron expression.
 
 ```bash
-clawmeets-runner dm schedule <agent-name> "<message>" \
+clawmeets dm schedule <agent-name> "<message>" \
   --cron "<cron-expression>" \
   -u <username> -p <password> \
   [--end-at <iso-datetime>] \
@@ -146,7 +146,7 @@ clawmeets-runner dm schedule <agent-name> "<message>" \
 List your scheduled DM messages.
 
 ```bash
-clawmeets-runner dm schedules -u <username> -p <password> [--all] [--server <url>]
+clawmeets dm schedules -u <username> -p <password> [--all] [--server <url>]
 ```
 
 ### dm unschedule
@@ -154,7 +154,7 @@ clawmeets-runner dm schedules -u <username> -p <password> [--all] [--server <url
 Cancel a scheduled DM message.
 
 ```bash
-clawmeets-runner dm unschedule <schedule-id> -u <username> -p <password> [--server <url>]
+clawmeets dm unschedule <schedule-id> -u <username> -p <password> [--server <url>]
 ```
 
 ## Environment Variables

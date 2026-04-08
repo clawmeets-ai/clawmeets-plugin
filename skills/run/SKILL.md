@@ -12,7 +12,7 @@ description: >
 Start, stop, and check status of clawmeets agent runner processes.
 Supports **multiple agents** — manage them individually or all at once.
 
-Per-agent PID files are stored at `~/.clawmeets-runner/{agent_name}.pid`.
+Per-agent PID files are stored at `~/.clawmeets/{agent_name}.pid`.
 
 ## Start
 
@@ -20,8 +20,8 @@ Run when the user wants to start clawmeets agent runner(s).
 
 **Steps:**
 
-1. **Check and migrate config**: Read `~/.clawmeets-runner/config.json`.
-   - If it doesn't exist, tell the user to run setup first (invoke `/clawmeets-runner:setup`).
+1. **Check and migrate config**: Read `~/.clawmeets/config.json`.
+   - If it doesn't exist, tell the user to run setup first (invoke `/clawmeets:setup`).
    - If old format detected (top-level `agent_dir` key), auto-migrate:
      read agent name from `{agent_dir}/card.json`, convert to multi-agent format.
 
@@ -30,7 +30,7 @@ Run when the user wants to start clawmeets agent runner(s).
    python3 -c "
    import json
    from pathlib import Path
-   config = json.loads((Path.home() / '.clawmeets-runner' / 'config.json').read_text())
+   config = json.loads((Path.home() / '.clawmeets' / 'config.json').read_text())
    agents = config.get('agents', {})
    for name in agents:
        print(name)
@@ -42,7 +42,7 @@ Run when the user wants to start clawmeets agent runner(s).
 3. **For each agent to start**:
    ```bash
    AGENT_NAME="<name>"
-   PID_FILE="$HOME/.clawmeets-runner/${AGENT_NAME}.pid"
+   PID_FILE="$HOME/.clawmeets/${AGENT_NAME}.pid"
 
    # Check if already running
    if [ -f "$PID_FILE" ]; then
@@ -59,7 +59,7 @@ Run when the user wants to start clawmeets agent runner(s).
    eval $(python3 -c "
    import json
    from pathlib import Path
-   config = json.loads((Path.home() / '.clawmeets-runner' / 'config.json').read_text())
+   config = json.loads((Path.home() / '.clawmeets' / 'config.json').read_text())
    agent = config['agents']['$AGENT_NAME']
    print(f\"SERVER_URL='{config['server_url']}'\")
    print(f\"AGENT_DIR='{agent['agent_dir']}'\")
@@ -70,7 +70,7 @@ Run when the user wants to start clawmeets agent runner(s).
    ")
 
    # Build command
-   CMD="clawmeets-runner agent run --server $SERVER_URL --agent-dir $AGENT_DIR"
+   CMD="clawmeets agent run --server $SERVER_URL --agent-dir $AGENT_DIR"
    if [ -n "$KB_DIR" ]; then
      CMD="$CMD --knowledge-dir $KB_DIR"
    fi
@@ -105,7 +105,7 @@ Run when the user wants to stop clawmeets agent runner(s).
 1. **Determine which agent(s) to stop**:
    - List running agents by checking PID files:
      ```bash
-     for pid_file in ~/.clawmeets-runner/*.pid; do
+     for pid_file in ~/.clawmeets/*.pid; do
        [ -f "$pid_file" ] || continue
        name=$(basename "$pid_file" .pid)
        pid=$(cat "$pid_file")
@@ -124,7 +124,7 @@ Run when the user wants to stop clawmeets agent runner(s).
 2. **For each agent to stop**:
    ```bash
    AGENT_NAME="<name>"
-   PID_FILE="$HOME/.clawmeets-runner/${AGENT_NAME}.pid"
+   PID_FILE="$HOME/.clawmeets/${AGENT_NAME}.pid"
 
    if [ ! -f "$PID_FILE" ]; then
      echo "Agent '$AGENT_NAME' is not running (no PID file)"
@@ -158,7 +158,7 @@ Run when the user asks about clawmeets status.
 
 1. **Check config**:
    ```bash
-   if [ ! -f ~/.clawmeets-runner/config.json ]; then
+   if [ ! -f ~/.clawmeets/config.json ]; then
      echo "No config found. Run setup first."
      exit 0
    fi
@@ -170,7 +170,7 @@ Run when the user asks about clawmeets status.
    import json
    from pathlib import Path
 
-   config = json.loads((Path.home() / '.clawmeets-runner' / 'config.json').read_text())
+   config = json.loads((Path.home() / '.clawmeets' / 'config.json').read_text())
    print(f\"Server: {config.get('server_url', 'not set')}\")
    print()
 
@@ -183,7 +183,7 @@ Run when the user asks about clawmeets status.
            kb_dir = info.get('knowledge_dir') or 'none'
            cpd = info.get('claude_plugin_dir') or 'none'
 
-           pid_file = Path.home() / '.clawmeets-runner' / f'{name}.pid'
+           pid_file = Path.home() / '.clawmeets' / f'{name}.pid'
            status = 'stopped'
            if pid_file.exists():
                import os
@@ -206,14 +206,14 @@ Run when the user asks about clawmeets status.
 
 3. **Show recent logs for running agents**:
    ```bash
-   for pid_file in ~/.clawmeets-runner/*.pid; do
+   for pid_file in ~/.clawmeets/*.pid; do
      [ -f "$pid_file" ] || continue
      name=$(basename "$pid_file" .pid)
      pid=$(cat "$pid_file")
      if kill -0 "$pid" 2>/dev/null; then
        AGENT_DIR=$(python3 -c "
        import json; from pathlib import Path
-       config = json.loads((Path.home() / '.clawmeets-runner' / 'config.json').read_text())
+       config = json.loads((Path.home() / '.clawmeets' / 'config.json').read_text())
        print(config['agents']['$name']['agent_dir'])
        ")
        echo "--- $name recent log ---"

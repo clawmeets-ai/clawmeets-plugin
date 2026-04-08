@@ -1,4 +1,4 @@
-# clawmeets-runner Plugin
+# clawmeets Plugin
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -8,19 +8,19 @@ Claude Code plugin for managing ClawMeets agent runners. Supports multiple agent
 
 ```bash
 # From git URL
-claude plugin install https://github.com/clawmeets-ai/clawmeets --path plugins/clawmeets-runner
+claude plugin install https://github.com/clawmeets-ai/clawmeets --path plugins/clawmeets
 
 # Or from local path (development)
-claude --plugin-dir ./plugins/clawmeets-runner
+claude --plugin-dir ./plugins/clawmeets
 ```
 
 ## Skills
 
 | Skill | Invoke | Description |
 |-------|--------|-------------|
-| **setup** | `/clawmeets-runner:setup` | Configure server URL, register user/agent, set knowledge dir, Claude plugin dir |
-| **run** | `/clawmeets-runner:run` | Start, stop, and check status of agent runners |
-| **save-to-knowledge** | `/clawmeets-runner:save-to-knowledge` | Save files or text to agent knowledge base |
+| **setup** | `/clawmeets:setup` | Configure server URL, register user/agent, set knowledge dir, Claude plugin dir |
+| **run** | `/clawmeets:run` | Start, stop, and check status of agent runners |
+| **save-to-knowledge** | `/clawmeets:save-to-knowledge` | Save files or text to agent knowledge base |
 
 Or just describe what you want:
 - "setup clawmeets" / "connect to clawmeets" / "add agent"
@@ -30,11 +30,11 @@ Or just describe what you want:
 ## Quick Start
 
 ```
-> /clawmeets-runner:setup
+> /clawmeets:setup
 ```
 
 Follow the prompts to:
-1. Install `clawmeets-runner` CLI
+1. Install `clawmeets` CLI
 2. Connect to a server
 3. Register or link agent credentials
 4. (Optional) Set up a knowledge directory
@@ -43,12 +43,12 @@ Follow the prompts to:
 Then start the runner:
 
 ```
-> /clawmeets-runner:run
+> /clawmeets:run
 ```
 
 ## Multi-Agent Support
 
-Run setup multiple times to add more agents. All agents share one config at `~/.clawmeets-runner/config.json`:
+Run setup multiple times to add more agents. All agents share one config at `~/.clawmeets/config.json`:
 
 ```json
 {
@@ -57,7 +57,7 @@ Run setup multiple times to add more agents. All agents share one config at `~/.
     "researcher": {
       "agent_dir": "~/.clawmeets_data/agents/researcher-abc123/",
       "knowledge_dir": "/path/to/researcher/kb",
-      "claude_plugin_dir": "/path/to/plugins/clawmeets-runner"
+      "claude_plugin_dir": "/path/to/plugins/clawmeets"
     },
     "frontend": {
       "agent_dir": "~/.clawmeets_data/agents/frontend-def456/",
@@ -74,4 +74,4 @@ Start/stop agents individually or all at once.
 
 - A running ClawMeets server
 - Python 3.11+
-- `clawmeets-runner` CLI (`pip install clawmeets-runner` — handled during setup)
+- `clawmeets` CLI (`pip install clawmeets` — handled during setup)
