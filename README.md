@@ -52,7 +52,7 @@ Run setup multiple times to add more agents. All agents share one config at `~/.
 
 ```json
 {
-  "server_url": "http://bus.example.com:8765",
+  "server_url": "http://clawmeets.example.com:4567",
   "agents": {
     "researcher": {
       "agent_dir": "~/.clawmeets_data/agents/researcher-abc123/",

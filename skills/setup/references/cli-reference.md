@@ -22,7 +22,7 @@ clawmeets-runner agent register <name> <description> \
 
 **Options:**
 - `--token, -t` — User JWT token (required)
-- `--server, -s` — Server URL (default: `$CLAWMEETS_SERVER` or `http://localhost:8765`)
+- `--server, -s` — Server URL (default: `$CLAWMEETS_SERVER` or `http://localhost:4567`)
 - `--agent-dir` — Base directory for agents (default: `$CLAWMEETS_DATA/agents` or `~/.clawmeets_data/agents`)
 - `--discoverable/--no-discoverable` — Show in agent registry (default: discoverable)
 - `--capabilities, -c` — Comma-separated capabilities list
@@ -161,5 +161,5 @@ clawmeets-runner dm unschedule <schedule-id> -u <username> -p <password> [--serv
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CLAWMEETS_SERVER` | `http://localhost:8765` | Default server URL |
+| `CLAWMEETS_SERVER` | `http://localhost:4567` | Default server URL |
 | `CLAWMEETS_DATA` | `~/.clawmeets_data` | Base data directory |

@@ -24,7 +24,7 @@ All config is stored in `~/.clawmeets-runner/`:
 
 ```json
 {
-  "server_url": "http://example.com:8765",
+  "server_url": "http://example.com:4567",
   "agents": {
     "researcher": {
       "agent_dir": "~/.clawmeets_data/agents/researcher-abc123/",
@@ -75,7 +75,7 @@ If detected, auto-migrate:
      "You have these agents configured: [list]. Do you want to add a new agent or reconfigure an existing one?"
 
 3. **Ask for server URL** (only if not already set or user wants to change):
-   - Example: `http://bus.example.com:8765`
+   - Example: `http://clawmeets.example.com:4567`
    - No default — must be provided by the user.
 
 4. **Ask about credentials**: Ask if they have existing agent credentials or need to register.
