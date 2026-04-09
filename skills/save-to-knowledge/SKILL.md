@@ -19,29 +19,30 @@ Supports saving:
 
 ## Steps
 
-1. **Check config**: Read `~/.clawmeets/config.json`.
-   - If it doesn't exist, tell the user to run setup first (invoke `/clawmeets:setup`).
+1. **Check config and verify login**: Read `~/.clawmeets/config.json`.
+   - If it doesn't exist or no `current_user` set: "You need to log in first. Run `/clawmeets:login`."
 
 2. **Determine which agent**:
    ```bash
    python3 -c "
    import json; from pathlib import Path
    config = json.loads((Path.home() / '.clawmeets' / 'config.json').read_text())
-   agents = config.get('agents', {})
+   user = config['users'][config['current_user']]
+   agents = user.get('agents', {})
    for name, info in agents.items():
        kb = info.get('knowledge_dir') or 'not set'
        print(f'{name} (knowledge: {kb})')
    "
    ```
    - If **one agent**: use it.
-   - If **multiple**: ask which agent.
+   - If **multiple**: ask which agent to save knowledge to.
 
 3. **Verify knowledge_dir**:
    - If the selected agent has no `knowledge_dir` set (null):
      - Ask the user for the knowledge directory path
      - Create the directory if needed: `mkdir -p "$KB_DIR"`
-     - Update `~/.clawmeets/config.json` with the new path
-     - Set up CLAUDE.md in the knowledge dir if it doesn't exist (see setup skill for template)
+     - Update `~/.clawmeets/config.json` with the new path (under `users.{current_user}.agents.{name}.knowledge_dir`)
+     - Set up CLAUDE.md in the knowledge dir if it doesn't exist
 
 4. **Determine what to save**:
    - If the user specified a file path in their request, use that file directly
@@ -94,4 +95,4 @@ Supports saving:
 
 - If knowledge_dir doesn't exist when saving, offer to create it
 - If the source file doesn't exist, ask the user to verify the path
-- If config.json doesn't exist, direct user to run `/clawmeets:setup` first
+- If config.json doesn't exist or no user logged in, direct user to run `/clawmeets:login` first
