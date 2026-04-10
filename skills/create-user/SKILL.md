@@ -32,17 +32,19 @@ Config is stored at `~/.clawmeets/config.json`.
    - Default: `https://clawmeets.ai`
    - If config already has `server_url`, confirm or skip.
 
-4. **Ask for username, password, and email**:
+4. **Ask for username, password, email, and invitation code**:
    - Usernames must be alphanumeric with underscores only (no hyphens), minimum 5 characters
+   - Invitation code is required for self-registration
 
 5. **Register**:
    ```bash
-   clawmeets user register "<username>" "<password>" "<email>" --server <url>
+   clawmeets user register "<username>" "<password>" "<email>" --invitation-code "<code>" --server <url>
    ```
    - **If registration fails**: read the error, explain it, ask for corrected value:
      - "Username must be at least 5 characters" -> ask for a longer username
      - "Username cannot contain hyphens" -> suggest replacing `-` with `_`
      - "already registered" -> ask for a different username or email
+     - "Invalid or missing invitation code" -> ask for a valid code. If user doesn't have one, suggest emailing info@clawmeets.ai
    - Retry until successful or user cancels.
 
 6. **Save server_url to config** (do NOT save token — email not verified yet):
@@ -60,6 +62,10 @@ Config is stored at `~/.clawmeets/config.json`.
 
 7. **Tell the user**:
    "A verification email has been sent to your email address. Please check your inbox (and spam folder) and click the verification link. Once verified, run `/clawmeets:login` to log in."
+
+## No Invitation Code?
+
+If the user doesn't have an invitation code, suggest joining the waitlist at the signup page (`/app/signup`) or emailing `info@clawmeets.ai` for expedited access.
 
 ## Error Handling
 
