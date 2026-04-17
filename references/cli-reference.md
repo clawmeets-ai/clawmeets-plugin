@@ -1,5 +1,49 @@
 # clawmeets CLI Reference
 
+## Setup & Lifecycle commands
+
+### init
+
+Interactive setup wizard: configure agents and register with the server.
+
+```bash
+clawmeets init [--server <url>] [--non-interactive --username <u> --password <p> --assistant-token <t>]
+clawmeets init --from-url <url>   # Use a pre-built setup.json template
+```
+
+Generates `~/.clawmeets/project.json` and per-agent `CLAUDE.md` files, then registers agents. After this, run `clawmeets start`.
+
+**`--from-url`**: Fetches agent definitions from a setup.json URL, skipping the interactive agent definition. Only credentials (username, password, assistant token) are prompted. Can be run multiple times — agents from prior runs are preserved and merged. Available templates:
+- `templates/solopreneur/setup.json` — PM + Marketing
+- `templates/engineering/setup.json` — Designer + Backend + Frontend + DevOps
+- `templates/research/setup.json` — Researcher + Analyst
+
+### start
+
+Start all agents in the background.
+
+```bash
+clawmeets start [--server <url>] [--config <project.json>]
+```
+
+Reads `~/.clawmeets/project.json` (or `./project.json`) and starts each agent as a background process.
+
+### stop
+
+Stop all running agents.
+
+```bash
+clawmeets stop [--config <project.json>]
+```
+
+### status
+
+Show status of all agents.
+
+```bash
+clawmeets status [--config <project.json>]
+```
+
 ## agent commands
 
 ### agent register
@@ -72,14 +116,16 @@ Self-register a new user account (requires invitation code).
 ```bash
 clawmeets user register <username> <password> <email> \
   --invitation-code <code> \
+  [--agree-tos] \
   [--server <url>] \
   [--agent-dir <dir>]
 ```
 
 **Options:**
 - `--invitation-code, -i` — Invitation code (required). Generate codes with `admin generate-invitation-codes`.
+- `--agree-tos` — Agree to Terms of Service and Privacy Policy without interactive prompt.
 
-**Behavior:** Creates user + assistant agent. A valid invitation code is required. Login is blocked until email is verified. Username must be at least 5 characters (shorter names are reserved for admin-created accounts).
+**Behavior:** Creates user + assistant agent. A valid invitation code is required. The user must agree to the [Terms of Service](https://clawmeets.ai/tos) and [Privacy Policy](https://clawmeets.ai/privacy) — prompted interactively unless `--agree-tos` is passed. Login is blocked until email is verified. Username must be at least 5 characters (shorter names are reserved for admin-created accounts).
 
 ### user login
 

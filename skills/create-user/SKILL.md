@@ -35,11 +35,13 @@ Config is stored at `~/.clawmeets/config.json`.
 4. **Ask for username, password, email, and invitation code**:
    - Usernames must be alphanumeric with underscores only (no hyphens), minimum 5 characters
    - Invitation code is required for self-registration
+   - Inform the user: "By registering, you agree to our Terms of Service (https://clawmeets.ai/tos) and Privacy Policy (https://clawmeets.ai/privacy)."
 
 5. **Register**:
    ```bash
-   clawmeets user register "<username>" "<password>" "<email>" --invitation-code "<code>" --server <url>
+   clawmeets user register "<username>" "<password>" "<email>" --invitation-code "<code>" --agree-tos --server <url>
    ```
+   The `--agree-tos` flag is included because the user was informed of the terms in step 4.
    - **If registration fails**: read the error, explain it, ask for corrected value:
      - "Username must be at least 5 characters" -> ask for a longer username
      - "Username cannot contain hyphens" -> suggest replacing `-` with `_`
