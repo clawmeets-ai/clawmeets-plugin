@@ -39,33 +39,23 @@ claude --plugin-dir ./plugins/clawmeets
 
 ## Multi-Agent Support
 
-Run `/clawmeets:register-agent` multiple times to add more agents. All agents are organized under your user in `~/.clawmeets/config.json`:
+Run `/clawmeets:register-agent` multiple times to add more agents. Per-user config is stored in `$CLAWMEETS_DATA_DIR/config/{username}/project.json` (default: `~/.clawmeets/config/{username}/project.json`):
 
 ```json
 {
   "server_url": "https://clawmeets.ai",
-  "current_user": "alice",
-  "users": {
-    "alice": {
-      "token": "jwt...",
-      "agents": {
-        "researcher": {
-          "agent_dir": "~/.clawmeets_data/agents/researcher-abc123/",
-          "knowledge_dir": "/path/to/researcher/kb",
-          "claude_plugin_dir": null
-        },
-        "frontend": {
-          "agent_dir": "~/.clawmeets_data/agents/frontend-def456/",
-          "knowledge_dir": null,
-          "claude_plugin_dir": null
-        }
-      }
-    }
-  }
+  "user": {
+    "username": "alice",
+    "token": "jwt..."
+  },
+  "agents": [
+    {"name": "researcher", "description": "...", "knowledge_dir": "/path/to/kb"},
+    {"name": "frontend", "description": "..."}
+  ]
 }
 ```
 
-`/clawmeets:start` and `/clawmeets:stop` operate only on the current user's agents. Use `/clawmeets:logout` and `/clawmeets:login` to switch between users.
+The current user is tracked in `config/current_user`. Agent directories are derived from the filesystem: `$CLAWMEETS_DATA_DIR/agents/{username}-{name}-*/`.
 
 ## Prerequisites
 

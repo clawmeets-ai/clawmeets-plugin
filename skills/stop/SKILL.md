@@ -14,20 +14,25 @@ Stop agent runner(s) for the current logged-in user.
 
 1. **Read config and verify login**:
    ```bash
-   cat ~/.clawmeets/config.json
+   DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
+   CURRENT_USER=$(cat "$DATA_DIR/config/current_user" 2>/dev/null)
+   cat "$DATA_DIR/config/$CURRENT_USER/project.json" 2>/dev/null
    ```
-   - If no `current_user` set: "You need to log in first. Run `/clawmeets:login`."
+   - If no current_user or no `user.token` set: "You need to log in first. Run `/clawmeets:login`."
 
-2. **Find running agents** (only current user's agents):
+2. **Find running agents** (current user's agents):
    ```bash
    python3 -c "
-   import json, os, signal
+   import json, os
    from pathlib import Path
-   config = json.loads((Path.home() / '.clawmeets' / 'config.json').read_text())
-   user = config['users'][config['current_user']]
-   agents = user.get('agents', {})
-   clawmeets_dir = Path.home() / '.clawmeets'
-   for name in agents:
+   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
+   user = (data_dir / 'config' / 'current_user').read_text().strip()
+   config = json.loads((data_dir / 'config' / user / 'project.json').read_text())
+   username = config['user']['username']
+   agents = config.get('agents', [])
+   clawmeets_dir = data_dir
+   for a in agents:
+       name = f\"{username}-{a['name']}\"
        pid_file = clawmeets_dir / f'{name}.pid'
        if pid_file.exists():
            pid = int(pid_file.read_text().strip())

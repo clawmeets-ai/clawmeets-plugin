@@ -10,27 +10,33 @@ description: >
 
 Log out of the current ClawMeets session.
 
-Clears `current_user` but keeps all user data and agent configurations intact.
+Clears the JWT token but keeps all user data and agent configurations intact.
 To switch users, logout then run `/clawmeets:login`.
 
 ## Steps
 
 1. **Read config**:
    ```bash
-   cat ~/.clawmeets/config.json
+   DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
+   if [ -f "$DATA_DIR/config/current_user" ]; then
+     CURRENT_USER=$(cat "$DATA_DIR/config/current_user")
+     cat "$DATA_DIR/config/$CURRENT_USER/project.json"
+   fi
    ```
-   - If no config or no `current_user` set: "You are not logged in."
+   - If no current_user or no `user.token` set: "You are not logged in."
 
-2. **Clear current_user**:
+2. **Clear token**:
    ```bash
    python3 -c "
-   import json
+   import json, os
    from pathlib import Path
-   config_path = Path.home() / '.clawmeets' / 'config.json'
+   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
+   user = (data_dir / 'config' / 'current_user').read_text().strip()
+   config_path = data_dir / 'config' / user / 'project.json'
    config = json.loads(config_path.read_text())
-   config['current_user'] = None
+   config.get('user', {}).pop('token', None)
    config_path.write_text(json.dumps(config, indent=2))
    "
    ```
 
-3. **Confirm**: "Logged out. Run `/clawmeets:login` to log in again or switch to a different user."
+3. **Confirm**: "Logged out. Run `/clawmeets:login` to log in again."

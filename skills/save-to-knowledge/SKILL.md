@@ -19,19 +19,25 @@ Supports saving:
 
 ## Steps
 
-1. **Check config and verify login**: Read `~/.clawmeets/config.json`.
-   - If it doesn't exist or no `current_user` set: "You need to log in first. Run `/clawmeets:login`."
+1. **Check config and verify login**:
+   ```bash
+   DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
+   CURRENT_USER=$(cat "$DATA_DIR/config/current_user" 2>/dev/null)
+   cat "$DATA_DIR/config/$CURRENT_USER/project.json" 2>/dev/null
+   ```
+   - If no current_user or no `user.token` set: "You need to log in first. Run `/clawmeets:login`."
 
 2. **Determine which agent**:
    ```bash
    python3 -c "
-   import json; from pathlib import Path
-   config = json.loads((Path.home() / '.clawmeets' / 'config.json').read_text())
-   user = config['users'][config['current_user']]
-   agents = user.get('agents', {})
-   for name, info in agents.items():
-       kb = info.get('knowledge_dir') or 'not set'
-       print(f'{name} (knowledge: {kb})')
+   import json, os; from pathlib import Path
+   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
+   user = (data_dir / 'config' / 'current_user').read_text().strip()
+   config = json.loads((data_dir / 'config' / user / 'project.json').read_text())
+   username = config['user']['username']
+   for a in config.get('agents', []):
+       kb = a.get('knowledge_dir') or 'not set'
+       print(f\"{username}-{a['name']} (knowledge: {kb})\")
    "
    ```
    - If **one agent**: use it.
@@ -41,7 +47,7 @@ Supports saving:
    - If the selected agent has no `knowledge_dir` set (null):
      - Ask the user for the knowledge directory path
      - Create the directory if needed: `mkdir -p "$KB_DIR"`
-     - Update `~/.clawmeets/config.json` with the new path (under `users.{current_user}.agents.{name}.knowledge_dir`)
+     - Update the user's project.json with the new path (under the agent's entry in `agents[]`)
      - Set up CLAUDE.md in the knowledge dir if it doesn't exist
 
 4. **Determine what to save**:
@@ -53,7 +59,9 @@ Supports saving:
 
 5a. **Browse chatroom files**:
    ```bash
-   AGENT_DIR="<agent_dir>"
+   # Derive agent_dir from filesystem
+   DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
+   AGENT_DIR=$(ls -d "$DATA_DIR/agents/${AGENT_NAME}-"* 2>/dev/null | head -1)
 
    # List projects
    echo "Available projects:"
@@ -95,4 +103,4 @@ Supports saving:
 
 - If knowledge_dir doesn't exist when saving, offer to create it
 - If the source file doesn't exist, ask the user to verify the path
-- If config.json doesn't exist or no user logged in, direct user to run `/clawmeets:login` first
+- If project.json doesn't exist or no user logged in, direct user to run `/clawmeets:login` first

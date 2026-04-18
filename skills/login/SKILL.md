@@ -10,19 +10,24 @@ description: >
 
 Log in to a ClawMeets server and save the session.
 
-Sets `current_user` so that `/clawmeets:register-agent`, `/clawmeets:start`,
-`/clawmeets:stop`, and `/clawmeets:save-to-knowledge` know which user's agents to operate on.
+Saves the JWT token so that `/clawmeets:register-agent`, `/clawmeets:start`,
+`/clawmeets:stop`, and `/clawmeets:save-to-knowledge` work without re-authenticating.
 
 ## Configuration
 
-Config is stored at `~/.clawmeets/config.json`.
+Config is stored at `~/.clawmeets/config/{username}/project.json`.
 
 ## Steps
 
-1. **Read existing config**:
+1. **Read existing config** (check current_user first):
    ```bash
-   if [ -f ~/.clawmeets/config.json ]; then
-     cat ~/.clawmeets/config.json
+   DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
+   CURRENT_USER=""
+   if [ -f "$DATA_DIR/config/current_user" ]; then
+     CURRENT_USER=$(cat "$DATA_DIR/config/current_user")
+     if [ -f "$DATA_DIR/config/$CURRENT_USER/project.json" ]; then
+       cat "$DATA_DIR/config/$CURRENT_USER/project.json"
+     fi
    fi
    ```
 
@@ -31,7 +36,7 @@ Config is stored at `~/.clawmeets/config.json`.
    - Otherwise ask the user (default: `https://clawmeets.ai`)
 
 3. **Ask for username and password**:
-   - If `current_user` is set in config, suggest it as default
+   - If `CURRENT_USER` is set, suggest it as default
 
 4. **Login**:
    ```bash
@@ -40,24 +45,25 @@ Config is stored at `~/.clawmeets/config.json`.
    - If login fails with "email not verified": tell user to check their email first
    - If login fails with "invalid credentials": ask user to re-enter
 
-5. **Save to config**:
+5. **Save token and set current user**:
    ```bash
    python3 -c "
-   import json
+   import json, os
    from pathlib import Path
-   config_path = Path.home() / '.clawmeets' / 'config.json'
-   config = json.loads(config_path.read_text()) if config_path.exists() else {}
+   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
+   config_path = data_dir / 'config' / '$USERNAME' / 'project.json'
+   config_path.parent.mkdir(parents=True, exist_ok=True)
+   config = json.loads(config_path.read_text()) if config_path.exists() else {'server_url': '$SERVER_URL', 'user': {'username': '$USERNAME'}}
    config['server_url'] = '$SERVER_URL'
-   config['current_user'] = '$USERNAME'
-   config.setdefault('users', {})
-   config['users'].setdefault('$USERNAME', {'token': None, 'agents': {}})
-   config['users']['$USERNAME']['token'] = '$TOKEN'
+   config.setdefault('user', {})['username'] = '$USERNAME'
+   config['user']['token'] = '$TOKEN'
    config_path.write_text(json.dumps(config, indent=2))
+   (data_dir / 'config' / 'current_user').write_text('$USERNAME')
    "
    ```
 
 6. **Show status**:
-   - If the user has agents configured, list them
+   - If the config has agents, list them
    - "Logged in as {username}. You have {n} agent(s): {names}."
    - Or: "Logged in as {username}. No agents configured yet. Run `/clawmeets:register-agent` to add one."
 

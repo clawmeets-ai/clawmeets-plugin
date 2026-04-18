@@ -19,12 +19,14 @@ grows and may need consolidation, review, or cleanup.
 1. **Determine agent and knowledge dir**:
    ```bash
    python3 -c "
-   import json; from pathlib import Path
-   config = json.loads((Path.home() / '.clawmeets' / 'config.json').read_text())
-   user = config['users'][config['current_user']]
-   for name, info in user.get('agents', {}).items():
-       kb = info.get('knowledge_dir') or 'not set'
-       print(f'{name}: {kb}')
+   import json, os; from pathlib import Path
+   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
+   user = (data_dir / 'config' / 'current_user').read_text().strip()
+   config = json.loads((data_dir / 'config' / user / 'project.json').read_text())
+   username = config['user']['username']
+   for a in config.get('agents', []):
+       kb = a.get('knowledge_dir') or 'not set'
+       print(f\"{username}-{a['name']}: {kb}\")
    "
    ```
    - If one agent: use it. If multiple: ask which agent.

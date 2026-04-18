@@ -17,21 +17,25 @@ Each agent runs as a background process, connecting to the server via WebSocket.
 
 1. **Read config and verify login**:
    ```bash
-   cat ~/.clawmeets/config.json
+   DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
+   CURRENT_USER=$(cat "$DATA_DIR/config/current_user" 2>/dev/null)
+   cat "$DATA_DIR/config/$CURRENT_USER/project.json" 2>/dev/null
    ```
-   - If no `current_user` set: "You need to log in first. Run `/clawmeets:login`."
-   - Extract `server_url` and `users.{current_user}.agents`
+   - If no current_user or no `user.token` set: "You need to log in first. Run `/clawmeets:login`."
+   - Extract `server_url`, `user.username`, and `agents` array
    - If no agents configured: "No agents registered. Run `/clawmeets:register-agent` first."
 
 2. **Determine which agent(s) to start**:
    ```bash
    python3 -c "
-   import json
+   import json, os
    from pathlib import Path
-   config = json.loads((Path.home() / '.clawmeets' / 'config.json').read_text())
-   user = config['users'][config['current_user']]
-   for name in user.get('agents', {}):
-       print(name)
+   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
+   user = (data_dir / 'config' / 'current_user').read_text().strip()
+   config = json.loads((data_dir / 'config' / user / 'project.json').read_text())
+   username = config['user']['username']
+   for a in config.get('agents', []):
+       print(f\"{username}-{a['name']}\")
    "
    ```
    - If **one agent**: start it directly.
@@ -39,7 +43,7 @@ Each agent runs as a background process, connecting to the server via WebSocket.
 
 3. **For each agent to start**:
    ```bash
-   AGENT_NAME="<name>"
+   AGENT_NAME="<prefixed-name>"
    PID_FILE="$HOME/.clawmeets/${AGENT_NAME}.pid"
 
    # Check if already running
@@ -53,27 +57,35 @@ Each agent runs as a background process, connecting to the server via WebSocket.
      fi
    fi
 
-   # Read agent config
+   # Read agent config and find agent_dir on disk
    eval $(python3 -c "
-   import json
+   import json, os
    from pathlib import Path
-   config = json.loads((Path.home() / '.clawmeets' / 'config.json').read_text())
-   agent = config['users'][config['current_user']]['agents']['$AGENT_NAME']
+   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
+   user = (data_dir / 'config' / 'current_user').read_text().strip()
+   config = json.loads((data_dir / 'config' / user / 'project.json').read_text())
+   username = config['user']['username']
+   # Find the unprefixed agent entry
+   unprefixed = '$AGENT_NAME'.removeprefix(f'{username}-')
+   agent = next((a for a in config.get('agents', []) if a['name'] == unprefixed), {})
+   # Derive agent_dir by scanning the agents directory
+   data_dir = os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets'))
+   agents_dir = Path(data_dir) / 'agents'
+   agent_dir = ''
+   for d in agents_dir.iterdir():
+       if d.is_dir() and d.name.startswith(f'$AGENT_NAME-'):
+           agent_dir = str(d)
+           break
    print(f\"SERVER_URL='{config['server_url']}'\")
-   print(f\"AGENT_DIR='{agent['agent_dir']}'\")
+   print(f\"AGENT_DIR='{agent_dir}'\")
    kb = agent.get('knowledge_dir') or ''
    print(f\"KB_DIR='{kb}'\")
-   cpd = agent.get('claude_plugin_dir') or ''
-   print(f\"CLAUDE_PLUGIN_DIR='{cpd}'\")
    ")
 
    # Build command
    CMD="clawmeets agent run --server $SERVER_URL --agent-dir $AGENT_DIR"
    if [ -n "$KB_DIR" ]; then
      CMD="$CMD --knowledge-dir $KB_DIR"
-   fi
-   if [ -n "$CLAUDE_PLUGIN_DIR" ]; then
-     CMD="$CMD --claude-plugin-dir $CLAUDE_PLUGIN_DIR"
    fi
 
    # Start in background

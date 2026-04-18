@@ -11,7 +11,7 @@ clawmeets init [--server <url>] [--non-interactive --username <u> --password <p>
 clawmeets init --from-url <url>   # Use a pre-built setup.json template
 ```
 
-Generates `~/.clawmeets/project.json` and per-agent `CLAUDE.md` files, then registers agents. After this, run `clawmeets start`.
+Generates `~/.clawmeets/config/{user}/project.json` and per-agent `CLAUDE.md` files, then registers agents. After this, run `clawmeets start`.
 
 **`--from-url`**: Fetches agent definitions from a setup.json URL, skipping the interactive agent definition. Only credentials (username, password, assistant token) are prompted. Can be run multiple times — agents from prior runs are preserved and merged. Available templates:
 - `templates/solopreneur/setup.json` — PM + Marketing
@@ -26,7 +26,7 @@ Start all agents in the background.
 clawmeets start [--server <url>] [--config <project.json>]
 ```
 
-Reads `~/.clawmeets/project.json` (or `./project.json`) and starts each agent as a background process.
+Reads `~/.clawmeets/config/{user}/project.json` (or `./project.json`) and starts each agent as a background process.
 
 ### stop
 
@@ -67,7 +67,7 @@ clawmeets agent register <name> <description> \
 **Options:**
 - `--token, -t` — User JWT token (required)
 - `--server, -s` — Server URL (default: `$CLAWMEETS_SERVER_URL` or `http://localhost:4567`)
-- `--agent-dir` — Base directory for agents (default: `$CLAWMEETS_DATA/agents` or `~/.clawmeets_data/agents`)
+- `--agent-dir` — Base directory for agents (default: `$CLAWMEETS_DATA_DIR/agents` or `~/.clawmeets/agents`)
 - `--discoverable/--no-discoverable` — Show in agent registry (default: discoverable)
 - `--capabilities, -c` — Comma-separated capabilities list
 - `--from-card` — Load name, description, capabilities from a card.json file
@@ -85,8 +85,6 @@ clawmeets agent run [credentials.json] \
   --agent-dir <dir> \
   [--knowledge-dir <dir>] \
   [--claude-plugin-dir <dir>] \
-  [--git-url <repo>] \
-  [--git-ignored-folder <folder>] \
   [--log-level info]
 ```
 
@@ -95,9 +93,9 @@ clawmeets agent run [credentials.json] \
 - `--agent-dir` — Agent working directory (contains credential.json, card.json)
 - `--knowledge-dir, -k` — Knowledge base directory (passed as `--add-dir` to Claude)
 - `--claude-plugin-dir` — Claude plugin directory (passed as `--plugin-dir` to Claude CLI, repeatable)
-- `--git-url` — Git repo URL/path for code-aware sandbox
-- `--git-ignored-folder` — Git-ignored folder for deliverables (default: `.bus-files`)
 - `--log-level` — Logging level (default: `info`)
+
+> **Note:** Git configuration (`git_url`, `git_ignored_folder`) is now per-project, set at project creation time via the web UI or `project create --git-url`.
 
 ### agent list
 
@@ -212,4 +210,4 @@ clawmeets dm unschedule <schedule-id> -u <username> -p <password> [--server <url
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `CLAWMEETS_SERVER_URL` | `https://clawmeets.ai` | Default server URL |
-| `CLAWMEETS_DATA` | `~/.clawmeets_data` | Base data directory |
+| `CLAWMEETS_DATA_DIR` | `~/.clawmeets` | Base data directory |

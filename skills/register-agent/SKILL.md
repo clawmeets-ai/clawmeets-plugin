@@ -17,10 +17,12 @@ current user's agent list in config.
 
 1. **Read config and verify login**:
    ```bash
-   cat ~/.clawmeets/config.json
+   DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
+   CURRENT_USER=$(cat "$DATA_DIR/config/current_user" 2>/dev/null)
+   cat "$DATA_DIR/config/$CURRENT_USER/project.json" 2>/dev/null
    ```
-   - If no `current_user` set: "You need to log in first. Run `/clawmeets:login`."
-   - Extract `server_url`, `current_user`, and `users.{current_user}.token`
+   - If no current_user or no `user.token` set: "You need to log in first. Run `/clawmeets:login`."
+   - Extract `server_url`, `user.username`, and `user.token`
 
 2. **Verify token is still valid** (try a simple API call):
    ```bash
@@ -79,24 +81,27 @@ current user's agent list in config.
 6. **Ask for Claude plugin directory** (optional):
    - "Do you want to configure a Claude plugin directory? Enter the absolute path, or press Enter to skip."
 
-7. **Save to config**:
+7. **Save agent to project.json**:
    ```bash
    python3 -c "
-   import json
+   import json, os
    from pathlib import Path
-   config_path = Path.home() / '.clawmeets' / 'config.json'
+   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
+   user = (data_dir / 'config' / 'current_user').read_text().strip()
+   config_path = data_dir / 'config' / user / 'project.json'
    config = json.loads(config_path.read_text())
-   user = config['users'][config['current_user']]
-   card = json.loads(Path('$AGENT_DIR/card.json').read_text())
-   agent_name = card['name']
-   user.setdefault('agents', {})
-   user['agents'][agent_name] = {
-       'agent_dir': '$AGENT_DIR',
-       'knowledge_dir': '$KB_DIR' if '$KB_DIR' else None,
-       'claude_plugin_dir': '$CLAUDE_PLUGIN_DIR' if '$CLAUDE_PLUGIN_DIR' else None
-   }
-   config_path.write_text(json.dumps(config, indent=2))
-   print(f'Agent registered: {agent_name}')
+   agents = config.setdefault('agents', [])
+   # Add if not already present (by name)
+   name = '$AGENT_NAME'
+   if not any(a['name'] == name for a in agents):
+       entry = {'name': name, 'description': '$DESCRIPTION', 'capabilities': [], 'discoverable': False}
+       if '$KB_DIR':
+           entry['knowledge_dir'] = '$KB_DIR'
+       agents.append(entry)
+       config_path.write_text(json.dumps(config, indent=2))
+       print(f'Agent saved: {name}')
+   else:
+       print(f'Agent already in config: {name}')
    "
    ```
 

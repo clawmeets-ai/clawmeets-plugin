@@ -14,7 +14,7 @@ After registration, the user must verify their email before they can log in.
 
 ## Configuration
 
-Config is stored at `~/.clawmeets/config.json`.
+Config is stored at `~/.clawmeets/config/{username}/project.json`.
 
 ## Steps
 
@@ -23,8 +23,10 @@ Config is stored at `~/.clawmeets/config.json`.
 
 2. **Read existing config** (if any):
    ```bash
-   if [ -f ~/.clawmeets/config.json ]; then
-     cat ~/.clawmeets/config.json
+   DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
+   if [ -f "$DATA_DIR/config/current_user" ]; then
+     CURRENT_USER=$(cat "$DATA_DIR/config/current_user")
+     cat "$DATA_DIR/config/$CURRENT_USER/project.json" 2>/dev/null
    fi
    ```
 
@@ -51,12 +53,14 @@ Config is stored at `~/.clawmeets/config.json`.
 
 6. **Save server_url to config** (do NOT save token — email not verified yet):
    ```bash
-   mkdir -p ~/.clawmeets
    python3 -c "
-   import json
+   import json, os
    from pathlib import Path
-   config_path = Path.home() / '.clawmeets' / 'config.json'
-   config = json.loads(config_path.read_text()) if config_path.exists() else {}
+   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
+   # Save server_url to a minimal project.json for this user
+   config_path = data_dir / 'config' / '$USERNAME' / 'project.json'
+   config_path.parent.mkdir(parents=True, exist_ok=True)
+   config = json.loads(config_path.read_text()) if config_path.exists() else {'user': {'username': '$USERNAME'}}
    config['server_url'] = '$SERVER_URL'
    config_path.write_text(json.dumps(config, indent=2))
    "
