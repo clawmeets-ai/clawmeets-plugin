@@ -23,7 +23,7 @@ Supports saving:
    ```bash
    DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
    CURRENT_USER=$(cat "$DATA_DIR/config/current_user" 2>/dev/null)
-   cat "$DATA_DIR/config/$CURRENT_USER/project.json" 2>/dev/null
+   cat "$DATA_DIR/config/$CURRENT_USER/settings.json" 2>/dev/null
    ```
    - If no current_user or no `user.token` set: "You need to log in first. Run `/clawmeets:login`."
 
@@ -33,7 +33,7 @@ Supports saving:
    import json, os; from pathlib import Path
    data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
    user = (data_dir / 'config' / 'current_user').read_text().strip()
-   config = json.loads((data_dir / 'config' / user / 'project.json').read_text())
+   config = json.loads((data_dir / 'config' / user / 'settings.json').read_text())
    username = config['user']['username']
    for a in config.get('agents', []):
        kb = a.get('knowledge_dir') or 'not set'
@@ -47,7 +47,7 @@ Supports saving:
    - If the selected agent has no `knowledge_dir` set (null):
      - Ask the user for the knowledge directory path
      - Create the directory if needed: `mkdir -p "$KB_DIR"`
-     - Update the user's project.json with the new path (under the agent's entry in `agents[]`)
+     - Update the user's settings.json with the new path (under the agent's entry in `agents[]`)
      - Set up CLAUDE.md in the knowledge dir if it doesn't exist
 
 4. **Determine what to save**:
@@ -103,4 +103,4 @@ Supports saving:
 
 - If knowledge_dir doesn't exist when saving, offer to create it
 - If the source file doesn't exist, ask the user to verify the path
-- If project.json doesn't exist or no user logged in, direct user to run `/clawmeets:login` first
+- If settings.json doesn't exist or no user logged in, direct user to run `/clawmeets:login` first

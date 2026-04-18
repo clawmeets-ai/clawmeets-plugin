@@ -11,18 +11,24 @@ description: >
 
 Navigate and interact with websites in real time using the browser toolkit.
 
-The toolkit is located at the plugin's `toolkit/navigator/` directory. Find its absolute path:
+The toolkit lives at `${CLAUDE_PLUGIN_ROOT}/toolkit/navigator/`, where
+`${CLAUDE_PLUGIN_ROOT}` is the absolute path to this plugin (set by Claude
+Code for both installed and `--plugin-dir` plugins).
 
 ```bash
-# The plugin directory containing this skill
-PLUGIN_DIR="$(find ~/.claude/plugins ~/.claude-plugin* ~/. -path '*/clawmeets/toolkit/navigator/navigator.py' -exec dirname {} \; 2>/dev/null | head -1)"
-# Fallback: check common locations
-if [ -z "$PLUGIN_DIR" ]; then
+PLUGIN_DIR="${CLAUDE_PLUGIN_ROOT}/toolkit/navigator"
+echo "Navigator toolkit: $PLUGIN_DIR"
+[ -f "$PLUGIN_DIR/navigator.py" ] || echo "Navigator not found at $PLUGIN_DIR"
+```
+
+If `$CLAUDE_PLUGIN_ROOT` is empty (very old Claude Code builds), fall back to
+searching the monorepo source checkout:
+```bash
+if [ -z "$PLUGIN_DIR" ] || [ ! -f "$PLUGIN_DIR/navigator.py" ]; then
   for d in plugins/clawmeets/toolkit/navigator ../../plugins/clawmeets/toolkit/navigator; do
     if [ -f "$d/navigator.py" ]; then PLUGIN_DIR="$(cd "$d" && pwd)"; break; fi
   done
 fi
-echo "Navigator toolkit: $PLUGIN_DIR"
 ```
 
 ## Prerequisites
@@ -39,9 +45,18 @@ The toolkit supports three browser modes via environment variables:
 | Visible browser | `export NAVIGATOR_HEADLESS=0` | Debugging, watching navigation |
 | External Chrome | `export NAVIGATOR_CDP_URL=http://localhost:9222` | Use real Chrome with your profile, extensions, logged-in sessions |
 
-To use an external Chrome, launch it first:
+To use an external Chrome, launch it first with a remote debugging port. The
+command varies by platform:
+
 ```bash
+# macOS
 /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
+
+# Linux
+google-chrome --remote-debugging-port=9222
+
+# Windows (PowerShell)
+& "$env:ProgramFiles\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
 ```
 
 ## Commands

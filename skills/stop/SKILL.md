@@ -10,71 +10,28 @@ description: >
 
 Stop agent runner(s) for the current logged-in user.
 
+Delegates to `clawmeets stop`, which reads the user's `settings.json`, finds
+each agent's PID file under `{agent_dir}/agent.pid`, and signals the process.
+
 ## Steps
 
-1. **Read config and verify login**:
+1. **Check `clawmeets` is installed**:
    ```bash
-   DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
-   CURRENT_USER=$(cat "$DATA_DIR/config/current_user" 2>/dev/null)
-   cat "$DATA_DIR/config/$CURRENT_USER/project.json" 2>/dev/null
+   command -v clawmeets >/dev/null 2>&1
    ```
-   - If no current_user or no `user.token` set: "You need to log in first. Run `/clawmeets:login`."
+   - If missing, tell the user to run `/clawmeets:bootstrap` first.
 
-2. **Find running agents** (current user's agents):
+2. **Stop all agents for the current user**:
    ```bash
-   python3 -c "
-   import json, os
-   from pathlib import Path
-   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
-   user = (data_dir / 'config' / 'current_user').read_text().strip()
-   config = json.loads((data_dir / 'config' / user / 'project.json').read_text())
-   username = config['user']['username']
-   agents = config.get('agents', [])
-   clawmeets_dir = data_dir
-   for a in agents:
-       name = f\"{username}-{a['name']}\"
-       pid_file = clawmeets_dir / f'{name}.pid'
-       if pid_file.exists():
-           pid = int(pid_file.read_text().strip())
-           try:
-               os.kill(pid, 0)
-               print(f'{name} (PID {pid}) - running')
-           except OSError:
-               print(f'{name} - not running (stale PID)')
-               pid_file.unlink()
-       else:
-           print(f'{name} - not running')
-   "
+   clawmeets stop
    ```
-   - If **none running**: "No agents are running."
-   - If **one running**: stop it directly.
-   - If **multiple running**: ask "Which agent to stop? [list] or 'all'"
+   - To stop a different user's agents: `clawmeets stop --user <username>`
 
-3. **For each agent to stop**:
-   ```bash
-   AGENT_NAME="<name>"
-   PID_FILE="$HOME/.clawmeets/${AGENT_NAME}.pid"
+3. **Report the result**: echo the CLI output to the user (it tells how many
+   agents were stopped, or "No agents were running.").
 
-   if [ ! -f "$PID_FILE" ]; then
-     echo "Agent '$AGENT_NAME' is not running"
-     # skip
-   fi
+## Notes
 
-   PID=$(cat "$PID_FILE")
-   if kill -0 "$PID" 2>/dev/null; then
-     kill "$PID"
-     for i in $(seq 1 10); do
-       kill -0 "$PID" 2>/dev/null || break
-       sleep 1
-     done
-     if kill -0 "$PID" 2>/dev/null; then
-       kill -9 "$PID"
-     fi
-     echo "Agent '$AGENT_NAME' stopped"
-   else
-     echo "Agent '$AGENT_NAME' was not running (stale PID file)"
-   fi
-   rm -f "$PID_FILE"
-   ```
-
-4. **Confirm**: "Stopped {n} agent(s)."
+- Do not touch PID files by hand. The CLI owns that state.
+- To check what is currently running without stopping: `clawmeets status`.
+- To start agents again: `/clawmeets:start`.

@@ -10,33 +10,35 @@ description: >
 
 Log out of the current ClawMeets session.
 
-Clears the JWT token but keeps all user data and agent configurations intact.
-To switch users, logout then run `/clawmeets:login`.
+Clears the saved JWT token from `settings.json`. Does NOT stop running agents
+(they have their own per-agent tokens) and does NOT delete any user data. To
+switch users, log out then run `/clawmeets:login`.
 
 ## Steps
 
-1. **Read config**:
+1. **Check CLI is installed**:
    ```bash
-   DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
-   if [ -f "$DATA_DIR/config/current_user" ]; then
-     CURRENT_USER=$(cat "$DATA_DIR/config/current_user")
-     cat "$DATA_DIR/config/$CURRENT_USER/project.json"
-   fi
+   command -v clawmeets >/dev/null 2>&1 || echo "MISSING"
    ```
-   - If no current_user or no `user.token` set: "You are not logged in."
+   If missing, tell the user to run `/clawmeets:bootstrap` first.
 
-2. **Clear token**:
+2. **Log out**:
    ```bash
-   python3 -c "
-   import json, os
-   from pathlib import Path
-   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
-   user = (data_dir / 'config' / 'current_user').read_text().strip()
-   config_path = data_dir / 'config' / user / 'project.json'
-   config = json.loads(config_path.read_text())
-   config.get('user', {}).pop('token', None)
-   config_path.write_text(json.dumps(config, indent=2))
-   "
+   clawmeets user logout
+   ```
+   Clears `user.token` from the current user's `settings.json`. The CLI will
+   print "Not logged in" if no `current_user` is set — in that case, tell the
+   user they are already logged out.
+
+3. **Optional: also clear the current_user pointer**:
+   If the user says "completely log out" or "forget me", add `--clear-current-user`:
+   ```bash
+   clawmeets user logout --clear-current-user
    ```
 
-3. **Confirm**: "Logged out. Run `/clawmeets:login` to log in again."
+4. **Confirm**: "Logged out. Run `/clawmeets:login` to log in again."
+
+## Notes
+
+- Running agents are unaffected. To stop them too, suggest `/clawmeets:stop`.
+- To log out a specific user (not the current one): `clawmeets user logout --user <name>`.

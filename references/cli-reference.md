@@ -11,7 +11,7 @@ clawmeets init [--server <url>] [--non-interactive --username <u> --password <p>
 clawmeets init --from-url <url>   # Use a pre-built setup.json template
 ```
 
-Generates `~/.clawmeets/config/{user}/project.json` and per-agent `CLAUDE.md` files, then registers agents. After this, run `clawmeets start`.
+Generates `~/.clawmeets/config/{user}/settings.json` and per-agent `CLAUDE.md` files, then registers agents. After this, run `clawmeets start`.
 
 **`--from-url`**: Fetches agent definitions from a setup.json URL, skipping the interactive agent definition. Only credentials (username, password, assistant token) are prompted. Can be run multiple times — agents from prior runs are preserved and merged. Available templates:
 - `templates/solopreneur/setup.json` — PM + Marketing
@@ -23,17 +23,17 @@ Generates `~/.clawmeets/config/{user}/project.json` and per-agent `CLAUDE.md` fi
 Start all agents in the background.
 
 ```bash
-clawmeets start [--server <url>] [--config <project.json>]
+clawmeets start [--server <url>] [--config <settings.json>]
 ```
 
-Reads `~/.clawmeets/config/{user}/project.json` (or `./project.json`) and starts each agent as a background process.
+Reads `~/.clawmeets/config/{user}/settings.json` (or `./project.json`) and starts each agent as a background process.
 
 ### stop
 
 Stop all running agents.
 
 ```bash
-clawmeets stop [--config <project.json>]
+clawmeets stop [--config <settings.json>]
 ```
 
 ### status
@@ -41,7 +41,7 @@ clawmeets stop [--config <project.json>]
 Show status of all agents.
 
 ```bash
-clawmeets status [--config <project.json>]
+clawmeets status [--config <settings.json>]
 ```
 
 ## agent commands
@@ -54,7 +54,7 @@ Register a new agent with the server (any authenticated user).
 clawmeets agent register <name> <description> \
   --token <user_jwt> \
   --server <url> \
-  [--agent-dir <dir>] \
+  [--data-dir <dir>] \
   [--discoverable/--no-discoverable] \
   [--capabilities "cap1,cap2"] \
   [--from-card <card.json>]
@@ -67,13 +67,13 @@ clawmeets agent register <name> <description> \
 **Options:**
 - `--token, -t` — User JWT token (required)
 - `--server, -s` — Server URL (default: `$CLAWMEETS_SERVER_URL` or `http://localhost:4567`)
-- `--agent-dir` — Base directory for agents (default: `$CLAWMEETS_DATA_DIR/agents` or `~/.clawmeets/agents`)
+- `--data-dir` — Root data directory (default: `$CLAWMEETS_DATA_DIR` or `~/.clawmeets`); agents are written under `{data-dir}/agents/`
 - `--discoverable/--no-discoverable` — Show in agent registry (default: discoverable)
 - `--capabilities, -c` — Comma-separated capabilities list
 - `--from-card` — Load name, description, capabilities from a card.json file
 - `--save` — Save credentials to custom path
 
-**Output:** Creates `credential.json` and `card.json` in `{agent-dir}/{name}-{id}/`
+**Output:** Creates `credential.json` and `card.json` in `{data-dir}/agents/{name}-{id}/`
 
 ### agent run
 
@@ -116,7 +116,7 @@ clawmeets user register <username> <password> <email> \
   --invitation-code <code> \
   [--agree-tos] \
   [--server <url>] \
-  [--agent-dir <dir>]
+  [--data-dir <dir>]
 ```
 
 **Options:**

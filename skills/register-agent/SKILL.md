@@ -11,103 +11,75 @@ description: >
 Register a new AI agent under the current logged-in user.
 
 Requires being logged in (`/clawmeets:login`). The agent will be added to the
-current user's agent list in config.
+current user's agent list in `settings.json`.
 
 ## Steps
 
-1. **Read config and verify login**:
+1. **Check CLI and login**:
    ```bash
+   command -v clawmeets >/dev/null 2>&1 || echo "MISSING_CLI"
    DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
    CURRENT_USER=$(cat "$DATA_DIR/config/current_user" 2>/dev/null)
-   cat "$DATA_DIR/config/$CURRENT_USER/project.json" 2>/dev/null
    ```
-   - If no current_user or no `user.token` set: "You need to log in first. Run `/clawmeets:login`."
-   - Extract `server_url`, `user.username`, and `user.token`
+   - If CLI missing: tell the user to run `/clawmeets:bootstrap`.
+   - If no current_user: "You need to log in first. Run `/clawmeets:login`."
 
-2. **Verify token is still valid** (try a simple API call):
-   ```bash
-   clawmeets agent list --server <url>
-   ```
-   - If token expired: "Your session has expired. Please run `/clawmeets:login` again."
-
-3. **Ask for agent details**:
-   - Agent name (required)
+2. **Ask for agent details**:
+   - Agent name (required, lowercase letters/digits/underscores)
    - Description (required)
    - Capabilities (optional, comma-separated)
+   - Knowledge directory (optional, absolute path; create it if the user approves and it doesn't exist)
 
-4. **Register the agent**:
+3. **Register and link to settings.json in one command**:
    ```bash
    clawmeets agent register "<name>" "<description>" \
-     --token "$TOKEN" --server "$SERVER_URL" \
-     --capabilities "<caps>"
+     --capabilities "<caps>" \
+     --save-to-settings \
+     --knowledge-dir "<kb_dir>"
    ```
-   - Note the agent directory path from output
+   The CLI reads the server URL and user token from the logged-in user's
+   `settings.json` automatically, and `--save-to-settings` appends the agent
+   to `agents[]`. No manual JSON parsing needed.
 
-5. **Ask for knowledge directory** (optional):
-   - "Where is the knowledge folder for this agent? Enter the absolute path, or press Enter to skip."
-   - If provided and directory doesn't exist, ask if it should be created
-   - If provided, set up `CLAUDE.md` in the knowledge dir:
-     ```bash
-     if [ ! -f "$KB_DIR/CLAUDE.md" ] || ! grep -q "^# Knowledge Base" "$KB_DIR/CLAUDE.md"; then
-       # Write or append the knowledge base template
-     fi
-     ```
-     **Knowledge base CLAUDE.md template:**
-     ```markdown
-     # Knowledge Base
+   - Omit `--capabilities` if the user didn't provide any.
+   - Omit `--knowledge-dir` if the user didn't provide one.
+   - If the CLI errors with "--token is required", the user's session has expired — ask them to run `/clawmeets:login` again.
 
-     This directory is your persistent knowledge base. Files saved here persist across projects and conversations.
-
-     ## When to Save
-
-     Save to this directory when a user asks you to:
-     - "Save this to your knowledge base"
-     - "Remember this for later"
-     - "Add this to your knowledge"
-
-     ## How to Save
-
-     1. Read the source content (from chatroom files, sandbox, or user's message)
-     2. Use the Write tool to save the file to THIS directory
-     3. Use a descriptive filename (e.g., `api-design-notes.md`, `competitor-analysis.md`)
-     4. Include a brief header noting the source (project name, date, chatroom)
-     5. Reply confirming what was saved and the filename
-
-     ## How to Use
-
-     When working on new tasks, check this directory for relevant reference material.
-     ```
-
-6. **Ask for Claude plugin directory** (optional):
-   - "Do you want to configure a Claude plugin directory? Enter the absolute path, or press Enter to skip."
-
-7. **Save agent to project.json**:
+4. **Set up a `CLAUDE.md` in the knowledge directory** (only if knowledge_dir was provided):
    ```bash
-   python3 -c "
-   import json, os
-   from pathlib import Path
-   data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
-   user = (data_dir / 'config' / 'current_user').read_text().strip()
-   config_path = data_dir / 'config' / user / 'project.json'
-   config = json.loads(config_path.read_text())
-   agents = config.setdefault('agents', [])
-   # Add if not already present (by name)
-   name = '$AGENT_NAME'
-   if not any(a['name'] == name for a in agents):
-       entry = {'name': name, 'description': '$DESCRIPTION', 'capabilities': [], 'discoverable': False}
-       if '$KB_DIR':
-           entry['knowledge_dir'] = '$KB_DIR'
-       agents.append(entry)
-       config_path.write_text(json.dumps(config, indent=2))
-       print(f'Agent saved: {name}')
-   else:
-       print(f'Agent already in config: {name}')
-   "
+   if [ -n "$KB_DIR" ] && [ ! -f "$KB_DIR/CLAUDE.md" ]; then
+     # Write the knowledge base template below to $KB_DIR/CLAUDE.md
+   fi
+   ```
+   **Knowledge base CLAUDE.md template:**
+   ```markdown
+   # Knowledge Base
+
+   This directory is your persistent knowledge base. Files saved here persist across projects and conversations.
+
+   ## When to Save
+
+   Save to this directory when a user asks you to:
+   - "Save this to your knowledge base"
+   - "Remember this for later"
+   - "Add this to your knowledge"
+
+   ## How to Save
+
+   1. Read the source content (from chatroom files, sandbox, or user's message)
+   2. Use the Write tool to save the file to THIS directory
+   3. Use a descriptive filename (e.g., `api-design-notes.md`, `competitor-analysis.md`)
+   4. Include a brief header noting the source (project name, date, chatroom)
+   5. Reply confirming what was saved and the filename
+
+   ## How to Use
+
+   When working on new tasks, check this directory for relevant reference material.
    ```
 
-8. **Confirm**: "Agent '{name}' registered and saved. Run `/clawmeets:start` to start the runner."
+5. **Confirm**: "Agent '{name}' registered and linked to {current_user}. Run `/clawmeets:start` to start the runner."
 
 ## Error Handling
 
-- If registration fails (name taken, invalid token), show the error and ask to retry
-- If agent directory doesn't contain `credential.json` after registration, something went wrong
+- If registration fails (name taken, invalid token), show the CLI's error and ask to retry.
+- If the CLI warns "no current_user and no --as-user", tell the user to `/clawmeets:login` first and retry.

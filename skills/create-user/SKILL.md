@@ -14,19 +14,19 @@ After registration, the user must verify their email before they can log in.
 
 ## Configuration
 
-Config is stored at `~/.clawmeets/config/{username}/project.json`.
+Config is stored at `~/.clawmeets/config/{username}/settings.json`.
 
 ## Steps
 
-1. **Check CLI installation**: Run `which clawmeets` to verify the CLI is installed.
-   - If not found: run `pip install clawmeets`
+1. **Check CLI installation**: Run `command -v clawmeets` to verify the CLI is installed.
+   - If not found: tell the user to run `/clawmeets:bootstrap` first, then re-invoke this skill. Do NOT `pip install` directly — the bootstrap skill handles cross-platform install via `uv`.
 
 2. **Read existing config** (if any):
    ```bash
    DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
    if [ -f "$DATA_DIR/config/current_user" ]; then
      CURRENT_USER=$(cat "$DATA_DIR/config/current_user")
-     cat "$DATA_DIR/config/$CURRENT_USER/project.json" 2>/dev/null
+     cat "$DATA_DIR/config/$CURRENT_USER/settings.json" 2>/dev/null
    fi
    ```
 
@@ -57,8 +57,8 @@ Config is stored at `~/.clawmeets/config/{username}/project.json`.
    import json, os
    from pathlib import Path
    data_dir = Path(os.environ.get('CLAWMEETS_DATA_DIR', os.path.expanduser('~/.clawmeets')))
-   # Save server_url to a minimal project.json for this user
-   config_path = data_dir / 'config' / '$USERNAME' / 'project.json'
+   # Save server_url to a minimal settings.json for this user
+   config_path = data_dir / 'config' / '$USERNAME' / 'settings.json'
    config_path.parent.mkdir(parents=True, exist_ok=True)
    config = json.loads(config_path.read_text()) if config_path.exists() else {'user': {'username': '$USERNAME'}}
    config['server_url'] = '$SERVER_URL'
@@ -67,7 +67,7 @@ Config is stored at `~/.clawmeets/config/{username}/project.json`.
    ```
 
 7. **Tell the user**:
-   "A verification email has been sent to your email address. Please check your inbox (and spam folder) and click the verification link. Once verified, run `/clawmeets:login` to log in."
+   "A verification email has been sent to your email address. Please check your inbox (and spam folder) and click the verification link. Once verified, run `/clawmeets:login` to log in. Your assistant token is available anytime under Account Settings on the web UI."
 
 ## No Invitation Code?
 
@@ -75,4 +75,4 @@ If the user doesn't have an invitation code, suggest joining the waitlist at the
 
 ## Error Handling
 
-- If `clawmeets` is not on PATH after pip install, suggest adding `~/.local/bin` to PATH
+- If `clawmeets` is not on PATH after bootstrap, suggest adding `~/.local/bin` to PATH (uv's default tool install prefix)
