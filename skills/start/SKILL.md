@@ -29,7 +29,7 @@ each agent's data directory.
    DATA_DIR="${CLAWMEETS_DATA_DIR:-$HOME/.clawmeets}"
    [ -f "$DATA_DIR/config/current_user" ] && cat "$DATA_DIR/config/current_user"
    ```
-   - If empty: "You need to log in first. Run `/clawmeets:login`."
+   - If empty: "You need to log in first. Run `/clawmeets:init`."
 
 3. **Start all agents for the current user**:
    ```bash

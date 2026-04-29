@@ -45,32 +45,29 @@ reinstall needed.
 | Skill | Invoke | Description |
 |-------|--------|-------------|
 | **bootstrap** | `/clawmeets:bootstrap` | Install/upgrade the `clawmeets` CLI via `uv` (run this first on a fresh machine) |
-| **create-user** | `/clawmeets:create-user` | Register a new user account (email verification required after) |
-| **login** | `/clawmeets:login` | Log in, save token, set current user |
+| **signup** | `/clawmeets:signup` | Register a new user account (email verification required after) |
+| **init** | `/clawmeets:init` | Log in and (optionally) generate + register a team from a freeform brief in one shot |
 | **logout** | `/clawmeets:logout` | Log out (keeps user data and agents) |
-| **register-agent** | `/clawmeets:register-agent` | Register a single agent under the current user |
-| **setup** | `/clawmeets:setup` | Generate and register a whole team from a freeform brief (LLM-authored profiles) |
+| **register-agent** | `/clawmeets:register-agent` | Register a single agent under the current user (uses the saved session — no password re-prompt) |
 | **start** | `/clawmeets:start` | Start agent runner(s) for the current user |
 | **stop** | `/clawmeets:stop` | Stop agent runner(s) for the current user |
-| **save-to-knowledge** | `/clawmeets:save-to-knowledge` | Save files or text to an agent's knowledge base |
-| **learn** | `/clawmeets:learn` | Review, consolidate, search, or reset an agent's accumulated learnings |
-| **browse** | `/clawmeets:browse` | Navigate and interact with websites using the bundled Playwright toolkit |
+| **reflect** | `/clawmeets:reflect` | Two modes invoked by the account-level schedule (not run during normal turns): **reflect** distills recent activity into USER.md (assistant only) and learnings/; **lint** audits existing memory for contradictions, stale claims, orphan pages, and missing cross-refs. Mode is detected by which trigger marker is in the message body. |
 
 ## Quick Start
 
 ```
 > /clawmeets:bootstrap          # one-time: install the CLI via uv
-> /clawmeets:create-user        # register account, then verify email
-> /clawmeets:login              # log in after email verification
-> /clawmeets:setup add a marketing specialist in IG and a sales specialist in
->                   cold calling for my artisan candle ecom business
+> /clawmeets:signup              # register account, then verify email
+> /clawmeets:init add a marketing specialist in IG and a sales specialist in
+>                  cold calling for my artisan candle ecom business
 > /clawmeets:start              # start the agent runners
 ```
 
-`/clawmeets:setup` is the fast path: describe your business and desired
-specialists in plain English, and the LLM drafts each agent's role,
-capabilities, and specialty profile before registering them. For adding a
-single agent by hand, use `/clawmeets:register-agent` instead.
+`/clawmeets:init` is the fast path: it logs you in and (if you give it a
+brief) drafts each agent's role, capabilities, and specialty profile before
+registering them — all in one shot. Run it without a brief to just log in
+or switch users. For adding a single agent by hand to an existing session,
+use `/clawmeets:register-agent` instead (no password re-prompt).
 
 ## Multi-Agent Support
 

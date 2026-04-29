@@ -12,7 +12,9 @@ Log out of the current ClawMeets session.
 
 Clears the saved JWT token from `settings.json`. Does NOT stop running agents
 (they have their own per-agent tokens) and does NOT delete any user data. To
-switch users, log out then run `/clawmeets:login`.
+switch users, just run `/clawmeets:init` with the other account's credentials
+— it flips `current_user` on login. Use this logout only when you want to
+clear the session on a shared machine without switching to a new user.
 
 ## Steps
 
@@ -36,7 +38,7 @@ switch users, log out then run `/clawmeets:login`.
    clawmeets user logout --clear-current-user
    ```
 
-4. **Confirm**: "Logged out. Run `/clawmeets:login` to log in again."
+4. **Confirm**: "Logged out. Run `/clawmeets:init` to log in again."
 
 ## Notes
 

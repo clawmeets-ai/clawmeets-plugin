@@ -93,8 +93,8 @@ the plugin manifest when the plugin depends on newer CLI features.
      ```
 
 6. **Confirm and next steps**: tell the user the CLI is ready, and suggest:
-   - `/clawmeets:create-user` to register a new account, or
-   - `/clawmeets:login` if they already have one.
+   - `/clawmeets:signup` to register a new account, or
+   - `/clawmeets:init` if they already have one (logs in and, optionally, sets up a team).
 
 ## Fallbacks
 

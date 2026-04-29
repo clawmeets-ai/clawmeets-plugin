@@ -1,12 +1,12 @@
 ---
-name: create-user
+name: signup
 description: >
   Register a new user account on a clawmeets server. After registration, the user
-  must verify their email before logging in. Use when users say "create user",
-  "register account", "sign up for clawmeets", or "create clawmeets account".
+  must verify their email before logging in. Use when users say "signup",
+  "sign up", "register account", "new account", or "sign up for clawmeets".
 ---
 
-# Create User
+# Signup
 
 Register a new user account on a ClawMeets server.
 
@@ -67,7 +67,7 @@ Config is stored at `~/.clawmeets/config/{username}/settings.json`.
    ```
 
 7. **Tell the user**:
-   "A verification email has been sent to your email address. Please check your inbox (and spam folder) and click the verification link. Once verified, run `/clawmeets:login` to log in. Your assistant token is available anytime under Account Settings on the web UI."
+   "A verification email has been sent to your email address. Please check your inbox (and spam folder) and click the verification link. Once verified, run `/clawmeets:init` to log in (and optionally set up an agent team in the same step). Your assistant token is available anytime under Account Settings on the web UI."
 
 ## No Invitation Code?
 
