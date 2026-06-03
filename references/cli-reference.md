@@ -19,12 +19,11 @@ Generates `~/.clawmeets/config/{user}/settings.json` and per-agent `CLAUDE.md` f
 - `templates/household/setup.json` — Meal Planner + Grocery Buyer + Family Scheduler + Home Keeper (consumer)
 - `templates/wellness/setup.json` — Nutritionist + Fitness Coach + Sleep Coach + Mind Coach (consumer)
 - `templates/finance/setup.json` — Budget Analyst + Investment Advisor + Tax Strategist + Bills Auditor (consumer)
-- `templates/solopreneur/setup.json` — PM + Marketing
+- `templates/solopreneur/setup.json` — Product + Market + Investor + Branding (3 iterative loops: PMF, pitch, Amazon-style announcement email)
 - `templates/engineering/setup.json` — Designer + Backend + Frontend + DevOps
-- `templates/research/setup.json` — Researcher + Analyst
-- `templates/retail/setup.json` — Analyst + Finance + Ops + Marketing + HR (business)
-- `templates/sales/setup.json` — Account Researcher + Prospector + Closer + Proposal Writer (business)
-- `templates/cos/setup.json` — Inbox Manager + Comms Writer + Board Prep + Meeting Prep (business; wires Gmail + Calendar MCPs)
+- `templates/data/setup.json` — DB Sync + Drive Sync + API Sync + Data Scientist (business data team)
+- `templates/retail/setup.json` — Market Analyst + Finance + Marketing (business)
+- `templates/sales/setup.json` — Sales Dev Rep + Account Executive + Field Sales Rep (business)
 
 ### start
 
@@ -156,7 +155,7 @@ clawmeets team set <agent-name-or-id>                    # clear
 
 ## reflection commands
 
-Configure your account-level reflection schedule. One cron expression fans out to all the agents you own; on each fire, the server triggers reflection only for agents with new activity since their last reflection (idle agents are skipped). Reflection runs as a marker-tagged DM trigger that the agent answers via the `/clawmeets:reflect` skill, distilling recent activity into its `knowledge_dir/USER.md` (personal assistant only) and `knowledge_dir/learnings/`.
+Configure your account-level reflection schedule. One cron expression fans out to all the agents you own; on each fire, the server triggers reflection only for agents with new activity since their last reflection (idle agents are skipped). Reflection runs as a marker-tagged DM trigger that the agent answers via the `/clawmeets:reflect` skill, distilling recent activity into its `knowledge_dir/learnings/` (and `USER.md` for the user's personal assistant). The optional lint cadence (`--lint-cron`) fires `/clawmeets:lint` to audit existing memory for contradictions, stale claims, and orphan pages.
 
 ### reflection set
 
@@ -186,6 +185,38 @@ Show the current schedule, including last and next fire timestamps.
 ```bash
 clawmeets reflection show [--token <user_jwt>] [--server <url>] [--data-dir <dir>]
 ```
+
+## bootstrap commands
+
+One-shot orchestrators that personalize agent memory. Each subcommand posts a marker-tagged DM trigger and returns immediately — the corresponding skill on the agent runner does the actual write. All subcommands are idempotent at both layers (CLI skips if the target file already exists; skill also no-ops). Use `--force` to re-trigger.
+
+> **Both Phase 1 and Phase 2 are now Welcome-page buttons, not CLI commands.**
+>
+> - **Phase 1 (assistant USER.md):** Click **"Introduce me to your assistant"** on the Welcome page (`/projects` in the web UI). Your assistant DMs you a few questions, reads any public profile URLs you paste (LinkedIn / personal site / GitHub / X), and writes `USER.md` via the `/clawmeets:interview` skill. No Gmail/Calendar OAuth required.
+> - **Phase 2 (per-worker `learnings/`):** Click **"Bootstrap workers"** on the Welcome page. The button creates a "Bootstrap workers (\<date\>)" project with the assistant as coordinator and the `agent_pool: 'owned'` filter. The assistant sequentially creates one chatroom per owned worker, asks each for a deep-research dump anchored on `USER.md`, then posts a `<!-- clawmeets:reflect-trigger -->` follow-up that inlines the worker's research as a recent-activity transcript. The worker's existing `/clawmeets:reflect` skill distills the dump into `learnings/INDEX.md` + 3–6 topic pages — same first-fill behavior the retired `/clawmeets:memory-bootstrap` used to provide.
+>
+> The CLI keeps the references indexer and the playwright-browser bootstrap.
+
+### bootstrap references
+
+Index user-pre-seeded files in each agent's `knowledge_dir/` into a top-level `REFERENCES.md` — one line per file, "when to invoke" descriptions. Independent of Phase 1/2; can run before or after them.
+
+```bash
+clawmeets bootstrap references [--agent <name>]... [--force] \
+  [-u <username>] [-p <password>] [--server <url>] [--data-dir <dir>]
+```
+
+Walks each agent's `knowledge_dir/` (following symlinked subdirs, so shared knowledge trees work) and lists every file into the trigger DM, excluding agent-authored / runtime-managed paths: files `USER.md`, `REFERENCES.md`, `CLAUDE.md`, `README.md`; subtrees `learnings/`, `skills/`, `config/`; plus dotfiles and `__pycache__`. The agent's `/clawmeets:references` skill reads each file (skim heuristic for >5 KB) and writes the index. Skips agents with no pre-seeded files (no LLM call). `--agent` is repeatable and accepts the full name (`chengtao-marketer`) or the short name (`marketer`); omit to index all owned agents incl. assistant.
+
+### bootstrap browser
+
+One-time per machine: install Chromium for the `playwright-browser` skill.
+
+```bash
+clawmeets bootstrap browser [--data-dir <dir>]
+```
+
+Verifies Node.js ≥ 20, runs `npx playwright install chromium` (~150 MB), and on Linux also `playwright install-deps chromium`. Idempotent.
 
 ## user commands
 

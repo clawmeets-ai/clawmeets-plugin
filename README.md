@@ -51,7 +51,10 @@ reinstall needed.
 | **register-agent** | `/clawmeets:register-agent` | Register a single agent under the current user (uses the saved session — no password re-prompt) |
 | **start** | `/clawmeets:start` | Start agent runner(s) for the current user |
 | **stop** | `/clawmeets:stop` | Stop agent runner(s) for the current user |
-| **reflect** | `/clawmeets:reflect` | Two modes invoked by the account-level schedule (not run during normal turns): **reflect** distills recent activity into USER.md (assistant only) and learnings/; **lint** audits existing memory for contradictions, stale claims, orphan pages, and missing cross-refs. Mode is detected by which trigger marker is in the message body. |
+| **reflect** | `/clawmeets:reflect` | Memory-loop skill, invoked by an agent on a `reflect-trigger` DM (scheduled, not during normal turns). Distills recent activity into `learnings/` (and `USER.md` for the user's assistant). Sub-modes Promote (codify a recurring procedure as a `/personal:<name>` skill) and Correct (patch a personal skill that misfired) run in the same cycle. |
+| **lint** | `/clawmeets:lint` | Memory-loop skill, invoked on a `lint-trigger` DM. Audits existing `learnings/` (and `USER.md` for assistants) for contradictions, stale claims, orphan pages, and missing cross-refs. Operates on the wiki itself — no transcript. |
+| **interview** | `/clawmeets:interview` | Memory-loop skill (assistant-only), invoked on an `interview-trigger` DM (posted by the Welcome page's "Introduce me to your assistant" button). Multi-turn conversation that asks the user for public profile URLs (LinkedIn / personal site / GitHub / X) and supplementary questions, WebFetches what's shared, and writes `USER.md` from the result. |
+| **references** | `/clawmeets:references` | Memory-loop skill, invoked on a `references-trigger` DM (posted by `clawmeets bootstrap references`). Indexes user-pre-seeded files in `knowledge_dir/` into `REFERENCES.md` — one line per file, "when to invoke" descriptions. |
 
 ## Quick Start
 
