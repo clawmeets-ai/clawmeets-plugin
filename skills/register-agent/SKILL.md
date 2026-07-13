@@ -68,6 +68,9 @@ up on the next run.
    - Omit `--team` if the user didn't ask for grouping. The flag is repeatable;
      pass it once per team. Defaults to `$CLAWMEETS_AGENT_TEAMS` (comma-separated)
      if no `--team` flag is given.
+   - Agents are **private by default**. Add `--discoverable` ONLY if the user
+     explicitly wants this agent published in the public registry where other
+     accounts can find and delegate to it.
    - If the CLI errors with "--token is required", the user's session has expired — ask them to run `/clawmeets:login` again.
 
 4. **Set up a `CLAUDE.md` in the knowledge directory** (only if knowledge_dir was provided):
